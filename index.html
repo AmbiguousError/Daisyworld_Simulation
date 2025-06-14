@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daisyworld Simulation</title>
-    <!-- Reverting to a known stable PyScript version for compatibility -->
+    <!-- Using a stable version of PyScript -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
@@ -27,17 +27,12 @@
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This tag will load the http library needed for the Gemini API call.
-         The py-game tag will handle loading pygame-ce automatically. -->
-    <py-config>
-        packages = ["pyodide-http"]
-    </py-config>
-
     <!-- This div is the target where Pygame will draw its display -->
     <div id="pygame-container"></div>
     
-    <!-- Using the specialized "py-game" script type is the recommended way for Pygame. -->
-    <!-- The "target" attribute tells Pygame where to create the display canvas. -->
+    <!-- Using the specialized "py-game" script type is the most reliable way for Pygame.
+         It handles loading the pygame-ce package automatically.
+         The "target" attribute tells Pygame where to create the display canvas. -->
     <script type="py-game" src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py" target="pygame-container">
     </script>
 
