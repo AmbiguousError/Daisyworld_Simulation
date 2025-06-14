@@ -27,14 +27,19 @@
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This tag tells PyScript to load required packages BEFORE running any code. -->
-    <!-- Added 'pyodide-http' to allow for network requests to the Gemini API. -->
+    <!-- This tag tells PyScript to load the package needed for the Gemini API. -->
+    <!-- The py-game script tag will handle loading pygame-ce automatically. -->
     <py-config>
-        packages = ["pygame-ce", "pyodide-http"]
+        packages = ["pyodide-http"]
     </py-config>
 
-    <!-- The main python script is referenced here using its full, raw GitHub URL. -->
-    <py-script src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py"></py-script>
+    <!-- This div is the target where Pygame will draw its display -->
+    <div id="pygame-container"></div>
+    
+    <!-- Use the specialized "py-game" script type for better compatibility. -->
+    <!-- The "target" attribute tells Pygame where to create the display canvas. -->
+    <script type="py-game" src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py" target="pygame-container">
+    </script>
 
 </body>
 </html>
