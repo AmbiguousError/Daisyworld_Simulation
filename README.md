@@ -1,4 +1,4 @@
-# Daisyworld: A Visual Simulation
+# Daisyworld: An Interactive Visual Simulation
 
 This project is an interactive, visual experiment based on James Lovelock's **Daisyworld model**, created with Python and the Pygame library. It provides a clear, hands-on demonstration of the core concepts of the **Gaia hypothesis**—the idea that life can collectively and unintentionally self-regulate its environment to maintain habitable conditions.
 
@@ -8,22 +8,22 @@ This project is an interactive, visual experiment based on James Lovelock's **Da
 
 ## The Concept
 
-Daisyworld is a hypothetical planet orbiting a star whose energy output is slowly increasing over time. The only life on this planet are two species of daisies:
+Daisyworld is a hypothetical planet orbiting a star. The only life on this planet are two species of daisies:
 
 * **Black Daisies:** Absorb sunlight, which warms their local surroundings and the planet as a whole.
 * **White Daisies:** Reflect sunlight, which cools their local surroundings and the planet.
 
-Both species have the same optimal temperature for growth (22.5°C) and cannot survive if it gets too hot or too cold. The simulation demonstrates how the competition between these two species creates a feedback loop that stabilizes the planet's temperature, even as the sun grows hotter.
+Both species have the same optimal temperature for growth (22.5°C) and cannot survive if it gets too hot or too cold. The simulation demonstrates how the competition between these two species creates a feedback loop that stabilizes the planet's temperature under different conditions.
 
 ---
 
 ## Features
 
-* **Interactive Simulation:** Watch the planet evolve in real-time.
-* **Dynamic Graphing:** A live chart displays the populations of both daisy species and the average planetary temperature, clearly showing the regulatory effect.
-* **Visual Planet Surface:** See the planet's surface change as the daisy populations shift.
-* **Multiple States:** The simulation includes a start screen, a running state, and an end screen that automatically appears when the experiment concludes.
-* **Clear Explanations:** On-screen panels and a detailed end screen explain the formulas, variables, and results of the experiment.
+* **Interactive Settings:** Before each run, modify key variables like daisy albedo, death rate, and solar luminosity to design your own experiments.
+* **Dynamic Solar Model:** Simulate a star that warms over time, or set the "Luminosity Change" to zero for a constant sun.
+* **Live Graphing:** A real-time chart displays the populations of both daisy species and the average planetary temperature.
+* **Dynamic End Scenarios:** The simulation automatically detects the outcome of your experiment and provides a specific explanation, whether it's a heat death, a freeze death, a stable equilibrium, or a failure for life to start at all.
+* **Configurable Stability:** Set how many turns of unchanging populations are needed before the simulation concludes that a stable state has been reached.
 
 ---
 
@@ -45,25 +45,24 @@ Both species have the same optimal temperature for growth (22.5°C) and cannot s
 
 3.  **Run the Simulation:** Navigate to the project directory in your terminal and run the script:
     ```bash
-    python daisyworld.py
+    python Daisyworld.py
     ```
+    (Note: The script name may vary depending on how you saved it).
 
 ---
 
 ## Controls
 
-* **ENTER:** Start the simulation from the welcome screen.
-* **SPACEBAR:** Pause or resume the running simulation.
-* **R KEY:** Restart the experiment from any screen (start, simulation, or end).
+* **Mouse Clicks:** Use the `+` / `-` buttons on the settings screen to adjust variables. Click "Load Defaults" or "Start Simulation" to proceed.
+* **R KEY:** From the simulation or end screen, press 'R' to return to the settings screen and run a new experiment.
 
 ---
 
-## Simulation Phases
+## How to Experiment
 
-When you run the experiment, you will observe three distinct phases on the graph:
+The settings screen allows you to explore the limits of the Gaian system. Try these experiments:
 
-1.  **Warming Phase:** Initially, the planet is cold. The heat-absorbing **black daisies** thrive, and their population grows, warming the planet to a comfortable temperature.
-
-2.  **Homeostasis (Regulation):** As the sun's energy increases, the planet gets warmer, giving the reflective **white daisies** an advantage. For a long period, the two populations dynamically balance each other out, keeping the planetary temperature remarkably stable. This is the Gaia effect in action.
-
-3.  **Extinction (Heat Death):** Eventually, the sun becomes too hot for even the cooling effect of the white daisies. The temperature soars past their survival limit, causing a total collapse of all life and a rapid, unregulated spike in the planet's temperature.
+* **Classic Daisyworld:** Use the default settings. Watch as the daisies battle to regulate the temperature against a warming sun, eventually succumbing to a "heat death."
+* **A Stable World:** Set the "Luminosity Change" to `0.0`. The daisies will find an equilibrium and maintain a stable temperature. The simulation will end once the "Stability Turns" condition is met.
+* **A Frozen Planet:** Set the "Start Luminosity" to a very low value (e.g., `0.6`). Can the black daisies generate enough heat to survive, or will the planet enter a "freeze death"?
+* **Inefficient Daisies:** Lower the "Heating Effect" or make the albedos of the white and black daisies very similar. Can life still regulate the climate effectively?
