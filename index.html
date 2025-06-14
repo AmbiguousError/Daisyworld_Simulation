@@ -26,17 +26,12 @@
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This configuration block now fetches packages directly from their URLs
-         and then explicitly installs them from the fetched files. -->
+    <!-- This configuration block now loads packages from URLs that are explicitly
+         compatible with the latest PyScript and Pyodide versions. -->
     <py-config>
         packages = [
-            "./pygame_ce-2.5.0-cp311-cp311-emscripten_3_1_46_wasm32.whl",
-            "./pyodide_http-0.2.1-py3-none-any.whl"
-        ]
-        [[fetch]]
-        files = [
-            "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pygame_ce-2.5.0-cp311-cp311-emscripten_3_1_46_wasm32.whl",
-            "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide_http-0.2.1-py3-none-any.whl"
+            "https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pygame_ce-2.5.0-cp312-cp312-emscripten_3_1_57_wasm32.whl",
+            "https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide_http-0.2.1-py3-none-any.whl"
         ]
     </py-config>
 
