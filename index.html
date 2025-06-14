@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daisyworld Simulation</title>
-    <!-- Imports the latest stable PyScript core CSS and JS -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.5.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2024.5.1/core.js"></script>
+    <!-- Reverting to a known stable PyScript version for compatibility -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
     <style>
       body {
@@ -16,21 +16,30 @@
         text-align: center;
         margin-top: 2rem;
       }
+      /* This ensures the Pygame canvas is centered */
+      #pygame-container {
+        display: flex;
+        justify-content: center;
+      }
     </style>
 </head>
 <body>
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This tag tells PyScript to load ALL required packages BEFORE running any code. -->
+    <!-- This tag will load the http library needed for the Gemini API call.
+         The py-game tag will handle loading pygame-ce automatically. -->
     <py-config>
-        packages = ["pygame-ce", "pyodide-http"]
+        packages = ["pyodide-http"]
     </py-config>
 
-    <!-- This py-script tag will now run the python file.
-         The python script itself will handle creating the display area. -->
-    <py-script src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py">
-    </py-script>
+    <!-- This div is the target where Pygame will draw its display -->
+    <div id="pygame-container"></div>
+    
+    <!-- Using the specialized "py-game" script type is the recommended way for Pygame. -->
+    <!-- The "target" attribute tells Pygame where to create the display canvas. -->
+    <script type="py-game" src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py" target="pygame-container">
+    </script>
 
 </body>
 </html>
