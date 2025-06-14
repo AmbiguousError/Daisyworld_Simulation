@@ -4,37 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daisyworld Simulation</title>
-    <!-- Using a stable version of PyScript -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
-
-    <style>
-      body {
-        font-family: sans-serif;
-        background-color: #141e28;
-        color: #fff;
-        text-align: center;
-        margin-top: 2rem;
-      }
-      /* This ensures the Pygame canvas is centered */
-      #pygame-container {
-        display: flex;
-        justify-content: center;
-      }
-    </style>
+    <!-- Using the latest stable version of PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.5.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.5.1/core.js"></script>
 </head>
 <body>
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This div is the target where Pygame will draw its display -->
+    <!-- This configuration block explicitly tells PyScript to load BOTH
+         the web-compatible version of Pygame and the library for API calls.
+         This is more reliable than using special script tags. -->
+    <py-config>
+        packages = ["pygame-ce", "pyodide-http"]
+    </py-config>
+
+    <!-- This is the container where the Python script will place the game canvas. -->
     <div id="pygame-container"></div>
-    
-    <!-- Using the specialized "py-game" script type is the most reliable way for Pygame.
-         It handles loading the pygame-ce package automatically.
-         The "target" attribute tells Pygame where to create the display canvas. -->
-    <script type="py-game" src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py" target="pygame-container">
-    </script>
+
+    <!-- We use a standard <py-script> tag to run our code.
+         The Python script itself will handle creating and placing the display. -->
+    <py-script src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py"></py-script>
 
 </body>
 </html>
