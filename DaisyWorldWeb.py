@@ -4,6 +4,39 @@ import math
 import copy
 import asyncio # Essential for web hosting
 
+# --- Gemini API Integration ---
+try:
+    import pyodide.http
+    # Make a request to the Gemini API
+    async def call_gemini_api(prompt):
+        api_key = "" # Leave blank when using the built-in proxy
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+        
+        payload = {"contents": [{"parts": [{"text": prompt}]}]}
+        
+        try:
+            response = await pyodide.http.pyfetch(
+                url,
+                method='POST',
+                headers={'Content-Type': 'application/json'},
+                body=str(payload).replace("'", '"') # Convert payload to JSON string
+            )
+            data = await response.json()
+            if data and 'candidates' in data and data['candidates']:
+                return data['candidates'][0]['content']['parts'][0]['text']
+            else:
+                return "Error: Could not parse response from Gemini API."
+        except Exception as e:
+            return f"An error occurred: {e}"
+except ImportError:
+    # Provide a mock function for desktop use
+    async def call_gemini_api(prompt):
+        print("Gemini API call (mocked for desktop):", prompt)
+        await asyncio.sleep(2) # Simulate network delay
+        return "This is a mocked response for desktop testing. The AI analysis feature only works when run in the browser."
+# --- End Gemini Integration ---
+
+
 # --- Pygame Setup ---
 pygame.init()
 pygame.font.init()
@@ -305,6 +338,35 @@ def draw_end_screen(world):
     restart_instr = FONT_TITLE.render("Press 'R' to Return to Settings", True, COLOR_TEXT_HIGHLIGHT)
     screen.blit(restart_instr, (WIDTH // 2 - restart_instr.get_width() // 2, HEIGHT - 100))
 
+    # --- Gemini Button ---
+    gemini_button_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT - 160, 300, 50)
+    pygame.draw.rect(screen, COLOR_SKY_BLUE, gemini_button_rect, border_radius=5)
+    gemini_text = FONT_TITLE.render("✨ Analyze with AI", True, COLOR_BLACK)
+    screen.blit(gemini_text, (gemini_button_rect.centerx - gemini_text.get_width() // 2, gemini_button_rect.centery - gemini_text.get_height() // 2))
+    return gemini_button_rect
+
+def draw_analysis_modal(text):
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((10, 10, 15, 245))
+    screen.blit(overlay, (0, 0))
+
+    modal_rect = pygame.Rect(100, 100, WIDTH - 200, HEIGHT - 200)
+    pygame.draw.rect(screen, COLOR_PANEL_BG, modal_rect, border_radius=10)
+    pygame.draw.rect(screen, COLOR_SKY_BLUE, modal_rect, 2, border_radius=10)
+
+    y_pos = modal_rect.top + 30
+    title_surf = FONT_SETTINGS_HEADER.render("AI Field Report", True, COLOR_SKY_BLUE)
+    screen.blit(title_surf, (modal_rect.centerx - title_surf.get_width()//2, y_pos)); y_pos += 60
+
+    text_area = pygame.Rect(modal_rect.left + 40, y_pos, modal_rect.width - 80, modal_rect.height - 150)
+    render_text_wrapped(screen, text, FONT_SETTINGS_TEXT, COLOR_GREY, text_area)
+
+    close_btn_rect = pygame.Rect(modal_rect.centerx - 75, modal_rect.bottom - 70, 150, 40)
+    pygame.draw.rect(screen, COLOR_BUTTON_BG, close_btn_rect, border_radius=5)
+    close_text = FONT_LABEL.render("Close", True, COLOR_BUTTON_TEXT)
+    screen.blit(close_text, (close_btn_rect.centerx - close_text.get_width()//2, close_btn_rect.centery - close_text.get_height()//2))
+    return close_btn_rect
+
 def draw_daisyworld_surface(surface, world, rect):
     num_pixels = int(rect.width * rect.height)
     num_white = int(num_pixels * world.frac_white)
@@ -360,4 +422,116 @@ def draw_info_panel(world, rect):
     title = FONT_TITLE.render("Daisyworld State", True, COLOR_WHITE)
     screen.blit(title, (rect.centerx - title.get_width() // 2, y_pos)); y_pos += 45
     draw_line("Time...........:", world.time, "steps")
-    draw_line("Solar Luminosity.:", world.solar_luminosity, ""
+    draw_line("Solar Luminosity.:", world.solar_luminosity, "", COLOR_SKY_BLUE)
+    draw_line("Planetary Albedo.:", world.get_planetary_albedo(), "")
+    draw_line("Planetary Temp...:", world.planetary_temp, "C", COLOR_GRAPH_TEMP); y_pos += 10
+    draw_line("White Daisy Pop..:", world.frac_white * 100, "%", COLOR_GRAPH_WHITE)
+    draw_line("Black Daisy Pop..:", world.frac_black * 100, "%", COLOR_GRAPH_BLACK)
+    draw_line("Bare Ground......:", world.frac_ground * 100, "%", COLOR_GROUND); y_pos += 40
+    formula_title = FONT_TITLE.render("Core Formulas", True, COLOR_WHITE)
+    screen.blit(formula_title, (rect.centerx - formula_title.get_width() // 2, y_pos)); y_pos += 40
+    formulas = ["Temp ~ (Luminosity * (1-Albedo))^0.25", "Albedo = sum(Frac_i * Albedo_i)", "Growth = 1-k*(T_opt-T_local)^2", "d(Frac)/dt = Frac*(Growth-Death)"]
+    for f in formulas:
+        formula_surf = FONT_FORMULA.render(f, True, COLOR_GREY)
+        screen.blit(formula_surf, (rect.left + 15, y_pos)); y_pos += 20
+
+def draw_buttons(rect):
+    back_btn_rect = pygame.Rect(rect.left + 20, rect.top, 150, 40)
+    pygame.draw.rect(screen, COLOR_BUTTON_BG, back_btn_rect, border_radius=5)
+    text = FONT_LABEL.render("Back to Settings", True, COLOR_BUTTON_TEXT)
+    screen.blit(text, (back_btn_rect.centerx - text.get_width()//2, back_btn_rect.centery - text.get_height()//2))
+    return back_btn_rect
+
+# --- Main Game Loop ---
+async def main():
+    global current_settings
+    running = True
+    game_state = 'settings_screen'
+    world = Daisyworld()
+    world_rect = pygame.Rect(20, 20, 750, 400)
+    graph_rect = pygame.Rect(20, 440, 750, 340)
+    info_rect = pygame.Rect(790, 20, 390, 760)
+    button_rect = pygame.Rect(info_rect.left, info_rect.bottom - 60, info_rect.width, 50)
+    world_surface = pygame.Surface((world_rect.width, world_rect.height))
+    settings_buttons = {}
+    
+    # State for Gemini modal
+    show_analysis_modal = False
+    analysis_text = "Loading AI analysis..."
+    gemini_button_rect, close_analysis_button_rect = None, None
+    gemini_response = ""
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if game_state == 'settings_screen':
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    for key, rect in settings_buttons.items():
+                        if rect.collidepoint(event.pos):
+                            if key == 'start':
+                                game_state = 'simulation'
+                                world.reset(current_settings)
+                            elif key == 'defaults':
+                                current_settings = copy.deepcopy(DEFAULT_SETTINGS)
+                            else:
+                                var, op = key.rsplit('_', 1)
+                                params = current_settings[var]
+                                if op == 'plus':
+                                    params['value'] = min(params['max'], round(params['value'] + params['step'], 4))
+                                elif op == 'minus':
+                                    params['value'] = max(params['min'], round(params['value'] - params['step'], 4))
+            elif game_state == 'simulation':
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                    game_state = 'settings_screen'
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    back_button = draw_buttons(button_rect)
+                    if back_button.collidepoint(event.pos):
+                        game_state = 'settings_screen'
+            elif game_state == 'end_screen':
+                 if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                    game_state = 'settings_screen'
+                    show_analysis_modal = False
+                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if gemini_button_rect and gemini_button_rect.collidepoint(event.pos) and not show_analysis_modal:
+                        show_analysis_modal = True
+                        analysis_text = "Loading AI analysis..."
+                        prompt = f"You are a planetary scientist observing a simulation of Daisyworld. The experiment just ended. The final temperature was {world.planetary_temp:.2f}C, the white daisy population was {world.frac_white*100:.2f}%, and the black daisy population was {world.frac_black*100:.2f}%. The outcome was '{world.end_reason}'. Write a creative, narrative-style field report log entry explaining what you observed and the likely story of this planet's fate."
+                        # Run the API call in the background
+                        async def update_analysis():
+                            nonlocal analysis_text
+                            analysis_text = await call_gemini_api(prompt)
+                        asyncio.create_task(update_analysis())
+                    if close_analysis_button_rect and close_analysis_button_rect.collidepoint(event.pos):
+                        show_analysis_modal = False
+
+
+        if game_state == 'settings_screen':
+            settings_buttons = draw_settings_screen(current_settings)
+        elif game_state == 'simulation':
+            world.step()
+            if world.end_reason:
+                game_state = 'end_screen'
+            screen.fill(COLOR_BLACK)
+            draw_daisyworld_surface(world_surface, world, world_surface.get_rect())
+            draw_graph(world, graph_rect)
+            draw_info_panel(world, info_rect)
+            draw_buttons(button_rect)
+        elif game_state == 'end_screen':
+            screen.fill(COLOR_BLACK)
+            draw_daisyworld_surface(world_surface, world, world_surface.get_rect())
+            draw_graph(world, graph_rect)
+            draw_info_panel(world, info_rect)
+            draw_buttons(button_rect)
+            gemini_button_rect = draw_end_screen(world)
+            if show_analysis_modal:
+                close_analysis_button_rect = draw_analysis_modal(analysis_text)
+
+
+        pygame.display.flip()
+        await asyncio.sleep(0)
+
+    pygame.quit()
+
+if __name__ == '__main__':
+    asyncio.run(main())
