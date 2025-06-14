@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daisyworld Simulation</title>
-    <!-- Use the latest stable version of PyScript -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.5.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2024.5.1/core.js"></script>
+    <!-- Use a specific, stable version of PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
 
     <style>
       body {
@@ -27,11 +27,11 @@
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
     <!-- This configuration block now loads packages from URLs that are explicitly
-         compatible with the latest PyScript and Pyodide versions. -->
+         compatible with the older, more stable version of PyScript. -->
     <py-config>
         packages = [
-            "https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pygame_ce-2.5.0-cp312-cp312-emscripten_3_1_57_wasm32.whl",
-            "https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide_http-0.2.1-py3-none-any.whl"
+            "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pygame_ce-2.4.0-cp311-cp311-emscripten_3_1_45_wasm32.whl",
+            "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide_http-0.2.1-py3-none-any.whl"
         ]
     </py-config>
 
