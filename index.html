@@ -4,14 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daisyworld Simulation</title>
+    <!-- Imports the PyScript core CSS and JS -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #141e28;
+        color: #fff;
+        text-align: center;
+        margin-top: 2rem;
+      }
+      #pygame-container {
+        display: flex;
+        justify-content: center;
+      }
+    </style>
 </head>
 <body>
     <h1>Daisyworld Simulation</h1>
-    <p>The simulation is loading below. This may take a moment...</p>
+    <p>The simulation is loading below. This may take a moment on the first visit...</p>
+
+    <!-- This div is the target for our Pygame display -->
     <div id="pygame-container"></div>
-    <py-script src="./DaisyWorld.py">
+    
+    <!-- This tag tells PyScript what to run -->
+    <py-script src="./DaisyWorld.py" config='{"packages": ["pygame"]}' terminal="false" output="pygame-container">
     </py-script>
 </body>
 </html>
+
