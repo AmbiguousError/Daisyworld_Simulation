@@ -411,6 +411,7 @@ async def main():
             screen.fill(COLOR_BLACK); draw_daisyworld_surface(world_surface, world, world_surface.get_rect()); draw_graph(world, graph_rect); draw_info_panel(world, info_rect); draw_buttons(button_rect)
             draw_end_screen(world)
 
+
         pygame.display.flip()
         await asyncio.sleep(0)
 
@@ -418,4 +419,5 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
 
