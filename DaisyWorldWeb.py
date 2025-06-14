@@ -2,6 +2,7 @@ import pygame
 import random
 import math
 import copy
+import asyncio # Essential for web hosting
 
 # --- Pygame Setup ---
 pygame.init()
@@ -9,18 +10,7 @@ pygame.font.init()
 
 # Screen dimensions
 WIDTH, HEIGHT = 1200, 800
-# The target='pygame-container' argument below is the key change for web hosting.
-# It tells Pygame to draw inside the HTML div with the id 'pygame-container'.
-screen = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32)
-try:
-    # This will work in PyScript/browser environment
-    from pyscript import document
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32, target='pygame-container')
-except ImportError:
-    # This will work when running on the desktop
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Daisyworld Simulation")
 
 # Colors
@@ -370,96 +360,4 @@ def draw_info_panel(world, rect):
     title = FONT_TITLE.render("Daisyworld State", True, COLOR_WHITE)
     screen.blit(title, (rect.centerx - title.get_width() // 2, y_pos)); y_pos += 45
     draw_line("Time...........:", world.time, "steps")
-    draw_line("Solar Luminosity.:", world.solar_luminosity, "", COLOR_SKY_BLUE)
-    draw_line("Planetary Albedo.:", world.get_planetary_albedo(), "")
-    draw_line("Planetary Temp...:", world.planetary_temp, "C", COLOR_GRAPH_TEMP); y_pos += 10
-    draw_line("White Daisy Pop..:", world.frac_white * 100, "%", COLOR_GRAPH_WHITE)
-    draw_line("Black Daisy Pop..:", world.frac_black * 100, "%", COLOR_GRAPH_BLACK)
-    draw_line("Bare Ground......:", world.frac_ground * 100, "%", COLOR_GROUND); y_pos += 40
-    formula_title = FONT_TITLE.render("Core Formulas", True, COLOR_WHITE)
-    screen.blit(formula_title, (rect.centerx - formula_title.get_width() // 2, y_pos)); y_pos += 40
-    formulas = ["Temp ~ (Luminosity * (1-Albedo))^0.25", "Albedo = sum(Frac_i * Albedo_i)", "Growth = 1-k*(T_opt-T_local)^2", "d(Frac)/dt = Frac*(Growth-Death)"]
-    for f in formulas:
-        formula_surf = FONT_FORMULA.render(f, True, COLOR_GREY)
-        screen.blit(formula_surf, (rect.left + 15, y_pos)); y_pos += 20
-
-def draw_buttons(rect):
-    back_btn_rect = pygame.Rect(rect.left + 20, rect.top, 150, 40)
-    pygame.draw.rect(screen, COLOR_BUTTON_BG, back_btn_rect, border_radius=5)
-    text = FONT_LABEL.render("Back to Settings", True, COLOR_BUTTON_TEXT)
-    screen.blit(text, (back_btn_rect.centerx - text.get_width()//2, back_btn_rect.centery - text.get_height()//2))
-    return back_btn_rect
-
-# --- Main Game Loop ---
-def main():
-    global current_settings
-    clock = pygame.time.Clock()
-    running = True
-    game_state = 'settings_screen'
-    world = Daisyworld()
-    world_rect = pygame.Rect(20, 20, 750, 400)
-    graph_rect = pygame.Rect(20, 440, 750, 340)
-    info_rect = pygame.Rect(790, 20, 390, 760)
-    button_rect = pygame.Rect(info_rect.left, info_rect.bottom - 60, info_rect.width, 50)
-    world_surface = pygame.Surface((world_rect.width, world_rect.height))
-    settings_buttons = {}
-
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if game_state == 'settings_screen':
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    for key, rect in settings_buttons.items():
-                        if rect.collidepoint(event.pos):
-                            if key == 'start':
-                                game_state = 'simulation'
-                                world.reset(current_settings)
-                            elif key == 'defaults':
-                                current_settings = copy.deepcopy(DEFAULT_SETTINGS)
-                            else:
-                                var, op = key.rsplit('_', 1)
-                                params = current_settings[var]
-                                if op == 'plus':
-                                    params['value'] = min(params['max'], params['value'] + params['step'])
-                                elif op == 'minus':
-                                    params['value'] = max(params['min'], params['value'] - params['step'])
-            elif game_state == 'simulation':
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                    game_state = 'settings_screen'
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    back_button = draw_buttons(button_rect)
-                    if back_button.collidepoint(event.pos):
-                        game_state = 'settings_screen'
-            elif game_state == 'end_screen':
-                 if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                    game_state = 'settings_screen'
-
-        if game_state == 'settings_screen':
-            settings_buttons = draw_settings_screen(current_settings)
-        elif game_state == 'simulation':
-            world.step()
-            if world.end_reason:
-                game_state = 'end_screen'
-            screen.fill(COLOR_BLACK)
-            draw_daisyworld_surface(world_surface, world, world_surface.get_rect())
-            draw_graph(world, graph_rect)
-            draw_info_panel(world, info_rect)
-            draw_buttons(button_rect)
-        elif game_state == 'end_screen':
-            # Keep the final state drawn before overlaying the end screen
-            screen.fill(COLOR_BLACK)
-            draw_daisyworld_surface(world_surface, world, world_surface.get_rect())
-            draw_graph(world, graph_rect)
-            draw_info_panel(world, info_rect)
-            draw_buttons(button_rect)
-            draw_end_screen(world)
-
-        pygame.display.flip()
-        clock.tick(60)
-
-    pygame.quit()
-
-if __name__ == '__main__':
-    main()
-
+    draw_line("Solar Luminosity.:", world.solar_luminosity, ""
