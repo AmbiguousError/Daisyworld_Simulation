@@ -16,6 +16,7 @@
         text-align: center;
         margin-top: 2rem;
       }
+      /* This ensures the Pygame canvas is centered */
       #pygame-container {
         display: flex;
         justify-content: center;
@@ -26,11 +27,16 @@
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This div is the target for our Pygame display -->
+    <!-- This tag tells PyScript to load required packages BEFORE running any code -->
+    <py-config>
+        packages = ["pygame"]
+    </py-config>
+
+    <!-- This div is the target where Pygame will draw its display -->
     <div id="pygame-container"></div>
     
-    <!-- This tag tells PyScript what to run -->
-    <py-script src="./DaisyWorldWeb.py" config='{"packages": ["pygame"]}' terminal="false" output="pygame-container">
+    <!-- This tag now just points to our main python script -->
+    <py-script src="./DaisyWorldWeb.py">
     </py-script>
 </body>
 </html>
