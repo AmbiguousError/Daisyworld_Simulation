@@ -2,7 +2,7 @@
 
 This project is an interactive, visual experiment based on James Lovelock's **Daisyworld model**, created with Python and the Pygame library. It provides a clear, hands-on demonstration of the core concepts of the **Gaia hypothesis**—the idea that life can collectively and unintentionally self-regulate its environment to maintain habitable conditions.
 
-![Daisyworld Simulation Screenshot](https://placehold.co/800x400/142828/FFFFFF?text=Daisyworld+Simulation)
+![Daisyworld Simulation Screenshot]([https://placehold.co/800x400/142828/FFFFFF?text=Daisyworld+Simulation](https://github.com/AmbiguousError/Daisyworld_Simulation/blob/main/DaisyWorld_Screenshot.gif))
 
 ---
 
