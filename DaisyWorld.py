@@ -238,7 +238,7 @@ def draw_settings_screen(settings):
 
 def draw_end_screen(world):
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    overlay.fill((20, 30, 40, 230))
+    overlay.fill((20, 30, 40, 240))
     screen.blit(overlay, (0, 0))
 
     final_temp = world.history['temp'][-1]
@@ -249,11 +249,8 @@ def draw_end_screen(world):
 
     if world.end_reason == 'stable':
         title_text = "Stable Equilibrium Reached"
-        color = (100, 255, 100) # Green
-        summary_text = [
-            ("Observation:", "The simulation ended because the daisy populations and temperature remained constant for the specified number of turns."),
-            ("Analysis:", "The conditions you set allowed the daisy populations to find a balance. They successfully regulated the planet's temperature, keeping it within a habitable range and demonstrating a robust Gaian system.")
-        ]
+        color = (100, 255, 100)
+        summary_text = [("Observation:", "The simulation ended because the daisy populations and temperature remained constant for the specified number of turns."),("Analysis:", "The conditions you set allowed the daisy populations to find a balance. They successfully regulated the planet's temperature, keeping it within a habitable range and demonstrating a robust Gaian system.")]
     elif max_white_pop < 2 and max_black_pop < 2:
         title_text = "Extinction: Failure to Launch"
         color = COLOR_GREY
@@ -261,23 +258,49 @@ def draw_end_screen(world):
     elif final_temp > world.max_temp:
         title_text = "Extinction: Heat Death"
         color = COLOR_GRAPH_TEMP
-        summary_text = [("Warming Phase:", "Initially, black daisies may have warmed the planet."),("Homeostasis:", "For a period, the daisies likely regulated the temperature. However, external pressure (e.g. high luminosity) or internal factors (e.g. inefficient albedos) made this unsustainable."),("Final Result:", "The environment eventually overwhelmed the daisies' regulatory capacity, causing the temperature to soar past their survival limit and leading to a total collapse of life.")]
+        summary_text = [("Warming Phase:", "Initially, black daisies may have warmed the planet."),("Homeostasis:", "For a period, the daisies likely regulated the temperature. However, external pressure or internal factors made this unsustainable."),("Final Result:", "The environment eventually overwhelmed the daisies' regulatory capacity, causing the temperature to soar past their survival limit and leading to a total collapse of life.")]
     elif final_temp < world.min_temp:
         title_text = "Extinction: Freeze Death"
         color = COLOR_SKY_BLUE
         summary_text = [("Warming attempt:", "Black daisies attempted to warm the planet, but the sun's luminosity was too low or their heating effect was too weak to overcome the cold."),("Result:", "The planet never reached the optimal temperature for sustained growth. The populations dwindled and life froze.")]
 
-    y_pos = 100
+    y_pos = 50
     title_surf = FONT_LARGE_TITLE.render(title_text, True, color)
-    screen.blit(title_surf, (WIDTH // 2 - title_surf.get_width() // 2, y_pos)); y_pos += 100
-    col_width = (WIDTH - 200)
-    col_rect = pygame.Rect(100, y_pos, col_width, HEIGHT - y_pos)
-    y_pos = col_rect.top
+    screen.blit(title_surf, (WIDTH // 2 - title_surf.get_width() // 2, y_pos)); y_pos += 80
+
+    left_col_rect = pygame.Rect(50, y_pos, WIDTH // 2 - 75, HEIGHT - y_pos - 100)
+    right_col_rect = pygame.Rect(WIDTH // 2 + 25, y_pos, WIDTH // 2 - 75, HEIGHT - y_pos - 100)
+    
+    y_pos_left = left_col_rect.top
+    header1_surf = FONT_SETTINGS_HEADER.render("Summary of Results", True, COLOR_SKY_BLUE)
+    screen.blit(header1_surf, (left_col_rect.left, y_pos_left)); y_pos_left += 50
     for header, desc in summary_text:
-        header_surf = FONT_SETTINGS_TEXT.render(header, True, COLOR_WHITE)
-        screen.blit(header_surf, (col_rect.left, y_pos)); y_pos += header_surf.get_height() + 5
-        text_rect = pygame.Rect(col_rect.left + 20, y_pos, col_rect.width - 20, 200)
-        y_pos = render_text_wrapped(screen, desc, FONT_SETTINGS_TEXT, COLOR_GREY, text_rect, 1.1); y_pos += 30
+        header_surf_sm = FONT_SETTINGS_TEXT.render(header, True, COLOR_WHITE)
+        screen.blit(header_surf_sm, (left_col_rect.left, y_pos_left)); y_pos_left += header_surf_sm.get_height() + 5
+        text_rect = pygame.Rect(left_col_rect.left + 20, y_pos_left, left_col_rect.width - 20, 200)
+        y_pos_left = render_text_wrapped(screen, desc, FONT_SETTINGS_TEXT, COLOR_GREY, text_rect, 1.1); y_pos_left += 30
+
+    y_pos_right = right_col_rect.top
+    header2_surf = FONT_SETTINGS_HEADER.render("Final State", True, COLOR_SKY_BLUE)
+    screen.blit(header2_surf, (right_col_rect.left, y_pos_right)); y_pos_right += 50
+    
+    def draw_final_line(label, value, unit, color=COLOR_WHITE):
+        nonlocal y_pos_right
+        label_surf = FONT_LABEL.render(label, True, COLOR_GREY)
+        value_surf = FONT_VALUE.render(f"{value:>7.2f} {unit}", True, color)
+        screen.blit(label_surf, (right_col_rect.left, y_pos_right))
+        screen.blit(value_surf, (right_col_rect.left + 250, y_pos_right)); y_pos_right += 35
+    
+    final_white_pop = world.history['white'][-1]
+    final_black_pop = world.history['black'][-1]
+    final_albedo = world.get_planetary_albedo()
+    draw_final_line("Final Temperature:", final_temp, "C", COLOR_GRAPH_TEMP)
+    draw_final_line("Final White Pop:", final_white_pop, "%", COLOR_GRAPH_WHITE)
+    draw_final_line("Final Black Pop:", final_black_pop, "%", COLOR_GRAPH_BLACK)
+    draw_final_line("Final Albedo:", final_albedo, "")
+    draw_final_line("Final Luminosity:", world.solar_luminosity, "")
+    draw_final_line("Total Time:", world.time, "steps")
+    
     restart_instr = FONT_TITLE.render("Press 'R' to Return to Settings", True, COLOR_TEXT_HIGHLIGHT)
     screen.blit(restart_instr, (WIDTH // 2 - restart_instr.get_width() // 2, HEIGHT - 100))
 
