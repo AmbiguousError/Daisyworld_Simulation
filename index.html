@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daisyworld Simulation</title>
-    <!-- Use a stable version of PyScript -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <!-- Reverting to an older, but very stable, version of PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.09.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2023.09.1/core.js"></script>
 
     <style>
       body {
@@ -27,14 +27,19 @@
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This div is the target where Pygame will draw its display -->
+    <!-- This configuration block now fetches packages directly from URLs that are
+         explicitly compatible with this older, stable version of PyScript. -->
+    <py-config>
+        packages = [
+            "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pygame_ce-2.3.1-cp311-cp311-emscripten_3_1_32_wasm32.whl",
+            "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide_http-0.2.1-py3-none-any.whl"
+        ]
+    </py-config>
+
     <div id="pygame-container"></div>
     
-    <!-- Using the specialized "py-game" script type is the most reliable way for Pygame.
-         It handles loading the pygame-ce package automatically.
-         The "target" attribute tells Pygame where to create the display canvas. -->
-    <script type="py-game" src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py" target="pygame-container">
-    </script>
+    <py-script src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py">
+    </py-script>
 
 </body>
 </html>
