@@ -306,66 +306,48 @@ def draw_end_screen(world):
     screen.blit(restart_instr, (WIDTH // 2 - restart_instr.get_width() // 2, HEIGHT - 100))
 
 def draw_daisyworld_surface(surface, world, rect):
-    num_pixels = int(rect.width * rect.height)
-    num_white = int(num_pixels * world.frac_white)
-    num_black = int(num_pixels * world.frac_black)
+    num_pixels = int(rect.width * rect.height); num_white = int(num_pixels * world.frac_white); num_black = int(num_pixels * world.frac_black)
     pixel_colors = [COLOR_DAISY_WHITE_PIXEL] * num_white + [COLOR_DAISY_BLACK_PIXEL] * num_black + [COLOR_GROUND] * (num_pixels - num_white - num_black)
     random.shuffle(pixel_colors)
     pixel_index = 0
     for y in range(rect.height):
         for x in range(rect.width):
             if pixel_index < num_pixels:
-                surface.set_at((x, y), pixel_colors[pixel_index])
-                pixel_index += 1
-    screen.blit(surface, rect.topleft)
-    pygame.draw.rect(screen, COLOR_WHITE, rect, 2)
+                surface.set_at((x, y), pixel_colors[pixel_index]); pixel_index += 1
+    screen.blit(surface, rect.topleft); pygame.draw.rect(screen, COLOR_WHITE, rect, 2)
 
 def draw_graph(world, rect):
-    pygame.draw.rect(screen, COLOR_PANEL_BG, rect)
-    pygame.draw.rect(screen, COLOR_WHITE, rect, 2)
+    pygame.draw.rect(screen, COLOR_PANEL_BG, rect); pygame.draw.rect(screen, COLOR_WHITE, rect, 2)
     history = world.history
     if len(history['time']) < 2: return
     def scale(val, val_min, val_max, rect_min, rect_max):
         if (val_max - val_min) == 0: return rect_min
         return rect_min + (rect_max - rect_min) * (val - val_min) / (val_max - val_min)
-    max_time = max(1, len(history['time'])) # Scale based on number of steps
+    max_time = max(1, len(history['time']))
     points_temp, points_white, points_black = [], [], []
     for i in range(len(history['time'])):
         x = scale(i, 0, max_time -1, rect.left, rect.right)
         points_temp.append((x, scale(history['temp'][i], -10, 80, rect.bottom, rect.top)))
         points_white.append((x, scale(history['white'][i], 0, 100, rect.bottom, rect.top)))
         points_black.append((x, scale(history['black'][i], 0, 100, rect.bottom, rect.top)))
-    pygame.draw.lines(screen, COLOR_GRAPH_TEMP, False, points_temp, 2)
-    pygame.draw.lines(screen, COLOR_GRAPH_WHITE, False, points_white, 2)
-    pygame.draw.lines(screen, COLOR_GRAPH_BLACK, False, points_black, 2)
+    pygame.draw.lines(screen, COLOR_GRAPH_TEMP, False, points_temp, 2); pygame.draw.lines(screen, COLOR_GRAPH_WHITE, False, points_white, 2); pygame.draw.lines(screen, COLOR_GRAPH_BLACK, False, points_black, 2)
     legend_items = [("Temp", COLOR_GRAPH_TEMP), ("White Daisies", COLOR_GRAPH_WHITE), ("Black Daisies", COLOR_GRAPH_BLACK)]
     lx, ly = rect.right - 140, rect.top + 15
     for name, color in legend_items:
-        pygame.draw.rect(screen, color, (lx, ly, 20, 10))
-        label_surf = FONT_LABEL.render(name, True, COLOR_WHITE)
-        screen.blit(label_surf, (lx + 25, ly - 3))
-        ly += 20
+        pygame.draw.rect(screen, color, (lx, ly, 20, 10)); label_surf = FONT_LABEL.render(name, True, COLOR_WHITE)
+        screen.blit(label_surf, (lx + 25, ly - 3)); ly += 20
 
 def draw_info_panel(world, rect):
-    pygame.draw.rect(screen, COLOR_PANEL_BG, rect)
-    pygame.draw.rect(screen, COLOR_WHITE, rect, 2)
+    pygame.draw.rect(screen, COLOR_PANEL_BG, rect); pygame.draw.rect(screen, COLOR_WHITE, rect, 2)
     y_pos = rect.top + 15
     def draw_line(label, value, unit, color=COLOR_WHITE):
         nonlocal y_pos
-        label_surf = FONT_LABEL.render(label, True, COLOR_GREY)
-        value_surf = FONT_VALUE.render(f"{value:>7.2f} {unit}", True, color)
-        screen.blit(label_surf, (rect.left + 15, y_pos))
-        screen.blit(value_surf, (rect.left + 200, y_pos))
-        y_pos += 25
+        label_surf = FONT_LABEL.render(label, True, COLOR_GREY); value_surf = FONT_VALUE.render(f"{value:>7.2f} {unit}", True, color)
+        screen.blit(label_surf, (rect.left + 15, y_pos)); screen.blit(value_surf, (rect.left + 200, y_pos)); y_pos += 25
     title = FONT_TITLE.render("Daisyworld State", True, COLOR_WHITE)
     screen.blit(title, (rect.centerx - title.get_width() // 2, y_pos)); y_pos += 45
-    draw_line("Time...........:", world.time, "steps")
-    draw_line("Solar Luminosity.:", world.solar_luminosity, "", COLOR_SKY_BLUE)
-    draw_line("Planetary Albedo.:", world.get_planetary_albedo(), "")
-    draw_line("Planetary Temp...:", world.planetary_temp, "C", COLOR_GRAPH_TEMP); y_pos += 10
-    draw_line("White Daisy Pop..:", world.frac_white * 100, "%", COLOR_GRAPH_WHITE)
-    draw_line("Black Daisy Pop..:", world.frac_black * 100, "%", COLOR_GRAPH_BLACK)
-    draw_line("Bare Ground......:", world.frac_ground * 100, "%", COLOR_GROUND); y_pos += 40
+    draw_line("Time...........:", world.time, "steps"); draw_line("Solar Luminosity.:", world.solar_luminosity, "", COLOR_SKY_BLUE); draw_line("Planetary Albedo.:", world.get_planetary_albedo(), ""); draw_line("Planetary Temp...:", world.planetary_temp, "C", COLOR_GRAPH_TEMP); y_pos += 10
+    draw_line("White Daisy Pop..:", world.frac_white * 100, "%", COLOR_GRAPH_WHITE); draw_line("Black Daisy Pop..:", world.frac_black * 100, "%", COLOR_GRAPH_BLACK); draw_line("Bare Ground......:", world.frac_ground * 100, "%", COLOR_GROUND); y_pos += 40
     formula_title = FONT_TITLE.render("Core Formulas", True, COLOR_WHITE)
     screen.blit(formula_title, (rect.centerx - formula_title.get_width() // 2, y_pos)); y_pos += 40
     formulas = ["Temp ~ (Luminosity * (1-Albedo))^0.25", "Albedo = sum(Frac_i * Albedo_i)", "Growth = 1-k*(T_opt-T_local)^2", "d(Frac)/dt = Frac*(Growth-Death)"]
