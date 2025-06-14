@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daisyworld Simulation</title>
-    <!-- Imports the PyScript core CSS and JS - Updated to a newer version -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.5.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2024.5.1/core.js"></script>
+    <!-- Imports the PyScript core CSS and JS - Reverted to a stable version -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
     <style>
       body {
@@ -33,11 +33,7 @@
         packages = ["pygame-ce", "pyodide-http"]
     </py-config>
 
-    <!-- This div is the target where Pygame will draw its display -->
-    <div id="pygame-container"></div>
-    
     <!-- The main python script is referenced here using its full, raw GitHub URL. -->
-    <!-- The 'output' attribute has been removed as the Python script now handles targeting the container. -->
     <py-script src="https://raw.githubusercontent.com/AmbiguousError/Daisyworld_Simulation/main/DaisyWorldWeb.py"></py-script>
 
 </body>
