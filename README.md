@@ -2,7 +2,7 @@
 
 This project is an interactive, visual experiment based on James Lovelock's **Daisyworld model**, created with Python and the Pygame library. It provides a clear, hands-on demonstration of the core concepts of the **Gaia hypothesis**—the idea that life can collectively and unintentionally self-regulate its environment to maintain habitable conditions.
 
-![Daisyworld Simulation Screenshot](./DaisyWorld_Screenshot.gif)
+![Daisyworld Simulation Set Vars](./Tweak%20Variables.jpg)
 
 ---
 
@@ -24,6 +24,8 @@ Both species have the same optimal temperature for growth (22.5°C) and cannot s
 * **Live Graphing:** A real-time chart displays the populations of both daisy species and the average planetary temperature.
 * **Dynamic End Scenarios:** The simulation automatically detects the outcome of your experiment and provides a specific explanation, whether it's a heat death, a freeze death, a stable equilibrium, or a failure for life to start at all.
 * **Configurable Stability:** Set how many turns of unchanging populations are needed before the simulation concludes that a stable state has been reached.
+
+![Daisyworld Simulation Screenshot](./DaisyWorld_Screenshot.gif)
 
 ---
 
