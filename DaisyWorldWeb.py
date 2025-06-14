@@ -4,6 +4,16 @@ import math
 import copy
 import asyncio # Essential for web hosting
 
+# --- PyScript Integration for display ---
+try:
+    from pyscript import display
+except ImportError:
+    # Define a dummy display function for desktop use
+    def display(value, target=None):
+        pass
+# --- End PyScript Integration ---
+
+
 # --- Gemini API Integration ---
 try:
     import pyodide.http
@@ -459,7 +469,9 @@ async def main():
     show_analysis_modal = False
     analysis_text = "Loading AI analysis..."
     gemini_button_rect, close_analysis_button_rect = None, None
-    gemini_response = ""
+
+    # This is the crucial change for web deployment
+    display(pygame.display.get_surface(), target="pygame-container", append=False)
 
     while running:
         for event in pygame.event.get():
