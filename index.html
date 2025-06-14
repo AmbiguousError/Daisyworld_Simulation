@@ -27,14 +27,18 @@
     <h1>Daisyworld Simulation</h1>
     <p>The simulation is loading below. This may take a moment on the first visit...</p>
 
-    <!-- This tag tells PyScript to load required packages BEFORE running any code -->
+    <!-- This tag tells PyScript to load required packages BEFORE running any code. -->
+    <!-- The key change is to specify 'pygame-ce', the WebAssembly-compatible version. -->
     <py-config>
-        packages = ["pygame"]
+        packages = ["pygame-ce"]
     </py-config>
 
-    <!-- The main python script is referenced here. PyScript will run it. -->
-    <py-script src="./DaisyWorldWeb.py"></py-script>
+    <!-- This div is the target where Pygame will draw its display -->
+    <div id="pygame-container"></div>
+    
+    <!-- The main python script is referenced here. 
+         The 'output' attribute links the display to the div above. -->
+    <py-script src="./DaisyWorldWeb.py" output="pygame-container"></py-script>
 
 </body>
 </html>
-
