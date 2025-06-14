@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daisyworld Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-mono {
+            font-family: 'Space Mono', monospace;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(10, 20, 30, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 antialiased">
+
+    <div id="settings-screen" class="container mx-auto p-4 md:p-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 text-center">Daisyworld Simulation</h1>
+        <p class="text-center text-gray-400 mb-8 max-w-3xl mx-auto">An interactive model demonstrating the Gaia Hypothesis, where life self-regulates its environment. Adjust the parameters below and run your own experiments.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <!-- Left Column: Explanation -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h2 class="text-2xl font-bold text-sky-400 mb-4">The Experiment</h2>
+                <p class="text-gray-400 mb-6">Life on Daisyworld consists of two species: black daisies that absorb heat and white daisies that reflect it. Their competition for space creates a feedback loop that can stabilize the planet's temperature, even as its sun changes.</p>
+                <h3 class="text-xl font-bold text-sky-400 mb-3">Core Formulas</h3>
+                <div class="font-mono text-sm text-gray-500 space-y-2">
+                    <p>Temp ~ (Luminosity * (1 - Albedo)) ^ 0.25</p>
+                    <p>Albedo = Σ (Fraction_i * Albedo_i)</p>
+                    <p>Growth = 1 - k * (T_optimal - T_local) ^ 2</p>
+                    <p>d(Frac)/dt = Frac * (Growth - DeathRate)</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Settings -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 space-y-4">
+                <h2 class="text-2xl font-bold text-sky-400 mb-4">Settings</h2>
+                <div id="settings-container" class="space-y-5">
+                    <!-- Sliders will be dynamically inserted here -->
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button id="defaults-btn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition-colors">Load Defaults</button>
+                    <button id="start-btn" class="w-full bg-sky-500 hover:bg-sky-400 text-gray-900 font-bold py-3 px-4 rounded-lg transition-colors">Start Simulation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="simulation-screen" class="hidden container mx-auto p-4 md:p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <canvas id="daisy-canvas" width="750" height="400"></canvas>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                     <canvas id="chart-canvas"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-6">Daisyworld State</h2>
+                <div id="info-panel" class="space-y-3 font-mono text-lg">
+                    <!-- Info will be dynamically inserted here -->
+                </div>
+                 <button id="back-to-settings-btn" class="mt-8 w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition-colors">Back to Settings</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- End Screen Modal -->
+    <div id="end-screen-modal" class="modal-overlay hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl p-6 md:p-8 max-w-4xl w-full mx-4">
+            <h2 id="end-title" class="text-3xl md:text-4xl font-bold mb-4 text-center"></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold text-sky-400 mb-3">Summary of Results</h3>
+                    <div id="end-summary" class="space-y-4 text-gray-300"></div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-sky-400 mb-3">Final State</h3>
+                    <div id="end-state" class="space-y-2 font-mono text-gray-300"></div>
+                </div>
+            </div>
+             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                 <button id="analyze-btn" class="bg-sky-500 hover:bg-sky-400 text-gray-900 font-bold py-3 px-6 rounded-lg transition-colors">✨ Analyze with AI</button>
+                <button id="end-restart-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition-colors">Return to Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis Modal -->
+    <div id="ai-modal" class="modal-overlay hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl p-6 md:p-8 max-w-3xl w-full mx-4 max-h-[80vh] flex flex-col">
+            <h2 class="text-3xl font-bold text-sky-400 mb-4 text-center">AI Field Report</h2>
+            <div id="ai-content" class="text-gray-300 overflow-y-auto pr-4 flex-grow">Loading...</div>
+            <div class="mt-6 text-center">
+                <button id="close-ai-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration and State ---
+        const SETTINGS_CONFIG = {
+            albedo_white: { value: 0.75, min: 0.5, max: 1.0, step: 0.05, format: v => v.toFixed(2), desc: "Reflectivity of white daisies." },
+            albedo_black: { value: 0.25, min: 0.0, max: 0.5, step: 0.05, format: v => v.toFixed(2), desc: "Reflectivity of black daisies." },
+            albedo_ground: { value: 0.50, min: 0.0, max: 1.0, step: 0.05, format: v => v.toFixed(2), desc: "Reflectivity of bare ground." },
+            death_rate: { value: 0.30, min: 0.1, max: 1.0, step: 0.05, format: v => v.toFixed(2), desc: "Natural death rate of daisies." },
+            start_luminosity: { value: 0.80, min: 0.4, max: 1.4, step: 0.05, format: v => v.toFixed(2), desc: "Initial solar energy." },
+            luminosity_change: { value: 0.0005, min: 0.0, max: 0.002, step: 0.0001, format: v => v.toFixed(4), desc: "Rate of solar warming." },
+            heating_effect: { value: 20, min: 0, max: 50, step: 2, format: v => v.toFixed(0), desc: "Local heating from daisies." },
+            stability_turns: { value: 250, min: 50, max: 1000, step: 50, format: v => v.toFixed(0), desc: "Turns of no change for stability." },
+        };
+        let currentSettings = JSON.parse(JSON.stringify(SETTINGS_CONFIG));
+        let animationFrameId;
+        
+        // --- DOM Elements ---
+        const settingsScreen = document.getElementById('settings-screen');
+        const simScreen = document.getElementById('simulation-screen');
+        const settingsContainer = document.getElementById('settings-container');
+        const startBtn = document.getElementById('start-btn');
+        const defaultsBtn = document.getElementById('defaults-btn');
+        const backToSettingsBtn = document.getElementById('back-to-settings-btn');
+        const endModal = document.getElementById('end-screen-modal');
+        const endRestartBtn = document.getElementById('end-restart-btn');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const aiModal = document.getElementById('ai-modal');
+        const aiContent = document.getElementById('ai-content');
+        const closeAiBtn = document.getElementById('close-ai-btn');
+
+        // --- Chart.js Setup ---
+        const chartCanvas = document.getElementById('chart-canvas').getContext('2d');
+        let dataChart = new Chart(chartCanvas, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Temp (°C)', data: [], borderColor: 'rgb(255, 99, 132)', tension: 0.1, yAxisID: 'y1' },
+                    { label: 'White Daisies (%)', data: [], borderColor: 'rgb(240, 240, 240)', tension: 0.1, yAxisID: 'y' },
+                    { label: 'Black Daisies (%)', data: [], borderColor: 'rgb(160, 160, 160)', tension: 0.1, yAxisID: 'y' }
+                ]
+            },
+            options: {
+                scales: {
+                    x: { ticks: { color: 'rgb(156, 163, 175)' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                    y: { type: 'linear', position: 'left', min: 0, max: 100, ticks: { color: 'rgb(156, 163, 175)' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                    y1: { type: 'linear', position: 'right', min: -10, max: 80, grid: { drawOnChartArea: false }, ticks: { color: 'rgb(255, 99, 132)' } }
+                },
+                plugins: { legend: { labels: { color: 'rgb(209, 213, 219)' } } }
+            }
+        });
+
+        // --- Daisyworld Class ---
+        class Daisyworld {
+            constructor(settings) { this.reset(settings); }
+            reset(settings) {
+                this.settings = JSON.parse(JSON.stringify(settings)); // Deep copy
+                Object.keys(this.settings).forEach(key => this[key] = this.settings[key].value);
+                this.solar_luminosity = this.start_luminosity;
+                this.frac_white = 0.01;
+                this.frac_black = 0.01;
+                this.time = 0;
+                this.history = { temp: [], white: [], black: [] };
+                this.end_reason = null;
+            }
+            getPlanetaryAlbedo() {
+                const ground_frac = 1 - this.frac_white - this.frac_black;
+                return this.frac_white * this.albedo_white + this.frac_black * this.albedo_black + ground_frac * this.albedo_ground;
+            }
+            step() {
+                if (this.solar_luminosity < 1.8) this.solar_luminosity += this.luminosity_change;
+                
+                const planetary_albedo = this.getPlanetaryAlbedo();
+                const temp_kelvin = (917 * this.solar_luminosity * (1 - planetary_albedo) / 5.67e-8) ** 0.25;
+                const planetary_temp = temp_kelvin - 273.15;
+                
+                const temp_white = planetary_temp + this.heating_effect * (planetary_albedo - this.albedo_white);
+                const temp_black = planetary_temp + this.heating_effect * (planetary_albedo - this.albedo_black);
+
+                const growthRate = (temp) => (temp > 5 && temp < 40) ? 1 - 0.003265 * ((22.5 - temp) ** 2) : 0;
+                
+                const beta_white = growthRate(temp_white);
+                const beta_black = growthRate(temp_black);
+                
+                const ground_frac = Math.max(0, 1 - this.frac_white - this.frac_black);
+                
+                const change_white = this.frac_white * (ground_frac * beta_white - this.death_rate);
+                const change_black = this.frac_black * (ground_frac * beta_black - this.death_rate);
+                
+                this.frac_white = Math.max(0.0001, Math.min(1, this.frac_white + change_white * 0.1));
+                this.frac_black = Math.max(0.0001, Math.min(1, this.frac_black + change_black * 0.1));
+
+                this.time++;
+                this.history.temp.push(planetary_temp);
+                this.history.white.push(this.frac_white * 100);
+                this.history.black.push(this.frac_black * 100);
+
+                if (this.time > 500 && (this.frac_white + this.frac_black) < 0.01) this.end_reason = 'extinct';
+                if (this.time > this.stability_turns) {
+                    const last_n = (arr) => arr.slice(-this.stability_turns);
+                    if (Math.max(...last_n(this.history.white)) - Math.min(...last_n(this.history.white)) < 0.01 &&
+                        Math.max(...last_n(this.history.black)) - Math.min(...last_n(this.history.black)) < 0.01) {
+                         if ((this.frac_white + this.frac_black) > 0.01) this.end_reason = 'stable';
+                    }
+                }
+            }
+        }
+        
+        let world = new Daisyworld(currentSettings);
+
+        // --- UI & Drawing ---
+        function createSettingsSliders() {
+            settingsContainer.innerHTML = '';
+            for (const key in currentSettings) {
+                const params = currentSettings[key];
+                const sliderHTML = `
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <label for="${key}" class="font-medium text-white">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
+                            <span class="font-mono text-sky-400">${params.format(params.value)}</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-2">${params.desc}</p>
+                        <input type="range" id="${key}" min="${params.min}" max="${params.max}" step="${params.step}" value="${params.value}" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>`;
+                settingsContainer.insertAdjacentHTML('beforeend', sliderHTML);
+            }
+        }
+
+        function updateSettingsFromUI() {
+            for (const key in currentSettings) {
+                const slider = document.getElementById(key);
+                currentSettings[key].value = parseFloat(slider.value);
+            }
+        }
+        
+        function updateUIFromSettings() {
+             for (const key in currentSettings) {
+                const slider = document.getElementById(key);
+                const valueSpan = slider.previousElementSibling.querySelector('span');
+                slider.value = currentSettings[key].value;
+                valueSpan.textContent = currentSettings[key].format(currentSettings[key].value);
+            }
+        }
+
+        function drawDaisyCanvas() {
+            const canvas = document.getElementById('daisy-canvas');
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(canvas.width, canvas.height);
+            const numPixels = canvas.width * canvas.height;
+            const numWhite = Math.floor(numPixels * world.frac_white);
+            const numBlack = Math.floor(numPixels * world.frac_black);
+            const colors = [
+                ...Array(numWhite).fill([240, 240, 240, 255]),
+                ...Array(numBlack).fill([50, 50, 50, 255]),
+                ...Array(numPixels - numWhite - numBlack).fill([150, 120, 90, 255])
+            ];
+            for (let i = colors.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [colors[i], colors[j]] = [colors[j], colors[i]];
+            }
+            for (let i = 0; i < numPixels; i++) {
+                const [r, g, b, a] = colors[i] || [150, 120, 90, 255];
+                imageData.data[i * 4] = r;
+                imageData.data[i * 4 + 1] = g;
+                imageData.data[i * 4 + 2] = b;
+                imageData.data[i * 4 + 3] = a;
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+        
+        function updateInfoPanel() {
+            const infoPanel = document.getElementById('info-panel');
+            infoPanel.innerHTML = `
+                <div class="flex justify-between"><span>Time:</span> <span class="text-gray-400">${world.time}</span></div>
+                <div class="flex justify-between"><span>Luminosity:</span> <span class="text-sky-400">${world.solar_luminosity.toFixed(4)}</span></div>
+                <div class="flex justify-between"><span>Albedo:</span> <span class="text-gray-400">${world.getPlanetaryAlbedo().toFixed(4)}</span></div>
+                <div class="flex justify-between"><span>Temperature:</span> <span class="text-red-500">${world.history.temp.slice(-1)[0].toFixed(2)}°C</span></div>
+                <div class="flex justify-between"><span>White Daisies:</span> <span class="text-white">${world.history.white.slice(-1)[0].toFixed(2)}%</span></div>
+                <div class="flex justify-between"><span>Black Daisies:</span> <span class="text-gray-400">${world.history.black.slice(-1)[0].toFixed(2)}%</span></div>
+            `;
+        }
+
+        function updateChart() {
+            dataChart.data.labels.push(world.time);
+            dataChart.data.datasets[0].data.push(world.history.temp.slice(-1)[0]);
+            dataChart.data.datasets[1].data.push(world.history.white.slice(-1)[0]);
+            dataChart.data.datasets[2].data.push(world.history.black.slice(-1)[0]);
+            if (dataChart.data.labels.length > 200) { // Keep chart from getting too crowded
+                dataChart.data.labels.shift();
+                dataChart.data.datasets.forEach(dataset => dataset.data.shift());
+            }
+            dataChart.update('none');
+        }
+
+        function showEndScreen() {
+            cancelAnimationFrame(animationFrameId);
+            const final_temp = world.history.temp.slice(-1)[0];
+            const max_white = Math.max(...world.history.white);
+            const max_black = Math.max(...world.history.black);
+            let title = "Experiment Complete";
+            let color = "text-white";
+            let summary = [];
+
+            if (world.end_reason === 'stable') {
+                title = "Stable Equilibrium Reached"; color = "text-green-400";
+                summary = [ {h: "Observation:", d: "The simulation ended because the populations and temperature remained constant for the specified turns."}, {h: "Analysis:", d: "The conditions you set allowed the daisies to find a balance, demonstrating a robust Gaian system."} ];
+            } else if (max_white < 2 && max_black < 2) {
+                title = "Extinction: Failure to Launch"; color = "text-gray-500";
+                summary = [ {h: "Initial Conditions:", d: "The parameters were too harsh for either daisy species to establish a foothold."}, {h: "Result:", d: "With no life, the planet's temperature was solely determined by physical factors, resulting in a barren world."} ];
+            } else if (final_temp > 40) {
+                title = "Extinction: Heat Death"; color = "text-red-500";
+                summary = [ {h: "Homeostasis:", d: "The daisies likely regulated the temperature for a period. However, external pressure or internal factors made this unsustainable."}, {h: "Final Result:", d: "The sun's energy eventually overwhelmed the daisies' cooling capacity, causing a total collapse of life."} ];
+            } else {
+                title = "Extinction: Freeze Death"; color = "text-sky-400";
+                summary = [ {h: "Warming Attempt:", d: "Black daisies attempted to warm the planet, but the sun's luminosity was too low or their heating effect was too weak."}, {h: "Result:", d: "The planet never reached the optimal temperature for sustained growth, and life froze."} ];
+            }
+
+            document.getElementById('end-title').textContent = title;
+            document.getElementById('end-title').className = `text-3xl md:text-4xl font-bold mb-4 text-center ${color}`;
+            document.getElementById('end-summary').innerHTML = summary.map(item => `<p><strong class="text-white">${item.h}</strong><br><span class="pl-4 inline-block">${item.d}</span></p>`).join('');
+            document.getElementById('end-state').innerHTML = `
+                <div class="flex justify-between"><span>Final Temp:</span> <span class="text-red-500">${final_temp.toFixed(2)}°C</span></div>
+                <div class="flex justify-between"><span>Final White Pop:</span> <span class="text-white">${world.frac_white.toFixed(2)*100}%</span></div>
+                <div class="flex justify-between"><span>Final Black Pop:</span> <span class="text-gray-400">${world.frac_black.toFixed(2)*100}%</span></div>
+            `;
+            endModal.classList.remove('hidden');
+        }
+
+        // --- Main Simulation Loop ---
+        function simulationLoop() {
+            world.step();
+            drawDaisyCanvas();
+            updateInfoPanel();
+            updateChart();
+            if (world.end_reason) {
+                showEndScreen();
+            } else {
+                animationFrameId = requestAnimationFrame(simulationLoop);
+            }
+        }
+        
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', () => {
+            updateSettingsFromUI();
+            world.reset(currentSettings);
+            
+            dataChart.data.labels = [];
+            dataChart.data.datasets.forEach(dataset => dataset.data = []);
+            dataChart.update();
+            
+            settingsScreen.classList.add('hidden');
+            simScreen.classList.remove('hidden');
+            
+            animationFrameId = requestAnimationFrame(simulationLoop);
+        });
+
+        defaultsBtn.addEventListener('click', () => {
+            currentSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+            updateUIFromSettings();
+        });
+
+        backToSettingsBtn.addEventListener('click', () => {
+            cancelAnimationFrame(animationFrameId);
+            simScreen.classList.add('hidden');
+            settingsScreen.classList.remove('hidden');
+        });
+
+        endRestartBtn.addEventListener('click', () => {
+            endModal.classList.add('hidden');
+            simScreen.classList.add('hidden');
+            settingsScreen.classList.remove('hidden');
+        });
+
+        analyzeBtn.addEventListener('click', async () => {
+            aiContent.textContent = "Querying the AI... please wait.";
+            aiModal.classList.remove('hidden');
+            
+            const prompt = `You are a planetary scientist observing a simulation of Daisyworld. The experiment just ended. 
+            The final temperature was ${world.history.temp.slice(-1)[0].toFixed(2)}C, 
+            the white daisy population was ${world.frac_white * 100:.2f}%, 
+            and the black daisy population was ${world.frac_black * 100:.2f}%. 
+            The outcome was '${world.end_reason}'. 
+            Write a creative, narrative-style field report log entry explaining what you observed and the likely story of this planet's fate.`;
+
+            // This is where you would call the Gemini API
+            const apiKey = ""; // API Key for Gemini
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+            try {
+                 const response = await fetch(url, {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify(payload)
+                 });
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0) {
+                     aiContent.textContent = result.candidates[0].content.parts[0].text;
+                } else {
+                     aiContent.textContent = "The AI returned an empty response. It might be pondering the void of your extinct world.";
+                }
+            } catch (error) {
+                aiContent.textContent = "Error connecting to the analysis AI. Please check the network connection and try again.";
+                console.error("Gemini API Error:", error);
+            }
+        });
+        
+        closeAiBtn.addEventListener('click', () => {
+            aiModal.classList.add('hidden');
+        });
+
+        settingsContainer.addEventListener('input', e => {
+            if (e.target.type === 'range') {
+                const valueSpan = e.target.previousElementSibling.querySelector('span');
+                currentSettings[e.target.id].value = parseFloat(e.target.value);
+                valueSpan.textContent = currentSettings[e.target.id].format(e.target.value);
+            }
+        });
+
+        // --- Initial Setup ---
+        createSettingsSliders();
+
+    </script>
+</body>
+</html>
