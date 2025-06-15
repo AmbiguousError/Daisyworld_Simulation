@@ -216,7 +216,7 @@
                 if (this.time > 500 && (this.frac_white + this.frac_black) < 0.01) this.end_reason = 'extinct';
                 if (this.time > this.stability_turns) {
                     const last_n = (arr) => arr.slice(-this.stability_turns);
-                    if (Math.max(...last_n(this.history.white)) - Math.min(...last_n(this.history.white)) < 0.01 &&
+                    if (this.history.white.length > this.stability_turns && Math.max(...last_n(this.history.white)) - Math.min(...last_n(this.history.white)) < 0.01 &&
                         Math.max(...last_n(this.history.black)) - Math.min(...last_n(this.history.black)) < 0.01) {
                          if ((this.frac_white + this.frac_black) > 0.01) this.end_reason = 'stable';
                     }
@@ -395,8 +395,8 @@
             
             const prompt = `You are a planetary scientist observing a simulation of Daisyworld. The experiment just ended. 
             The final temperature was ${world.history.temp.slice(-1)[0].toFixed(2)}C, 
-            the white daisy population was ${world.frac_white * 100:.2f}%, 
-            and the black daisy population was ${world.frac_black * 100:.2f}%. 
+            the white daisy population was ${(world.frac_white * 100).toFixed(2)}%, 
+            and the black daisy population was ${(world.frac_black * 100).toFixed(2)}%. 
             The outcome was '${world.end_reason}'. 
             Write a creative, narrative-style field report log entry explaining what you observed and the likely story of this planet's fate.`;
 
