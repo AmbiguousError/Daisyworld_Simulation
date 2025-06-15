@@ -1,9 +1,6 @@
 # Daisyworld: An Interactive Visual Simulation
 
-<figure class="video_container">
-  <iframe src="./WelcomeToDaisyWorld.mp4" frameborder="0" allowfullscreen="true"> 
-</iframe>
-</figure>
+<video src="./WelcomeToDaisyWorld.mp4" controls="controls" style="max-width: 730px;"></video>
  
 This project is an interactive, visual experiment based on James Lovelock's **Daisyworld model**, created with Python and the Pygame library. It provides a clear, hands-on demonstration of the core concepts of the **Gaia hypothesis**; the idea that life can collectively and unintentionally self-regulate its environment to maintain habitable conditions.
 
