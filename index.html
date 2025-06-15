@@ -67,8 +67,8 @@
     <div id="simulation-screen" class="hidden container mx-auto p-4 md:p-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
-                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                    <canvas id="daisy-canvas" width="750" height="400"></canvas>
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 w-full aspect-video">
+                    <canvas id="daisy-canvas" class="w-full h-full rounded"></canvas>
                 </div>
                 <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
                      <canvas id="chart-canvas"></canvas>
@@ -278,28 +278,49 @@
 
         function drawDaisyCanvas() {
             const canvas = document.getElementById('daisy-canvas');
+            const container = canvas.parentElement;
+            
+            // Match canvas drawing buffer size to its display size
+            if (canvas.width !== container.clientWidth || canvas.height !== container.clientHeight) {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+
             const ctx = canvas.getContext('2d');
-            const imageData = ctx.createImageData(canvas.width, canvas.height);
-            const numPixels = canvas.width * canvas.height;
-            const numWhite = Math.floor(numPixels * world.frac_white);
-            const numBlack = Math.floor(numPixels * world.frac_black);
-            const colors = [
-                ...Array(numWhite).fill([240, 240, 240, 255]),
-                ...Array(numBlack).fill([50, 50, 50, 255]),
-                ...Array(numPixels - numWhite - numBlack).fill([150, 120, 90, 255])
+            const gridWidth = 150; // Logical grid size
+            const gridHeight = Math.floor(gridWidth * (canvas.height / canvas.width));
+            const cellWidth = canvas.width / gridWidth;
+            const cellHeight = canvas.height / gridHeight;
+
+            const numCells = gridWidth * gridHeight;
+            const numWhite = Math.floor(numCells * world.frac_white);
+            const numBlack = Math.floor(numCells * world.frac_black);
+            
+            const cells = [
+                ...Array(numWhite).fill('white'),
+                ...Array(numBlack).fill('black'),
+                ...Array(numCells - numWhite - numBlack).fill('ground')
             ];
-            for (let i = colors.length - 1; i > 0; i--) {
+            for (let i = cells.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [colors[i], colors[j]] = [colors[j], colors[i]];
+                [cells[i], cells[j]] = [cells[j], cells[i]];
             }
-            for (let i = 0; i < numPixels; i++) {
-                const [r, g, b, a] = colors[i] || [150, 120, 90, 255];
-                imageData.data[i * 4] = r;
-                imageData.data[i * 4 + 1] = g;
-                imageData.data[i * 4 + 2] = b;
-                imageData.data[i * 4 + 3] = a;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let cellIndex = 0;
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    if (cellIndex < numCells) {
+                        switch (cells[cellIndex]) {
+                            case 'white': ctx.fillStyle = 'rgb(240, 240, 240)'; break;
+                            case 'black': ctx.fillStyle = 'rgb(50, 50, 50)'; break;
+                            default: ctx.fillStyle = 'rgb(150, 120, 90)'; break;
+                        }
+                        ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth + 1, cellHeight + 1);
+                        cellIndex++;
+                    }
+                }
             }
-            ctx.putImageData(imageData, 0, 0);
         }
         
         function updateInfoPanel() {
@@ -420,7 +441,7 @@
             Write a creative, narrative-style field report log entry explaining what you observed and the likely story of this planet's fate.`;
 
             // This is where you would call the Gemini API
-            const apiKey = "AIzaSyBe4FaOSzP9GaqTpcvW8lV-wKRu9nH82sA"; // IMPORTANT: Add your Gemini API key here
+            const apiKey = ""; // IMPORTANT: Add your Gemini API key here
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
@@ -450,9 +471,11 @@
         settingsContainer.addEventListener('input', e => {
             if (e.target.type === 'range') {
                 const settingItem = e.target.closest('.setting-item');
-                const valueSpan = settingItem.querySelector('.value-span');
-                currentSettings[e.target.id].value = parseFloat(e.target.value);
-                valueSpan.textContent = currentSettings[e.target.id].format(currentSettings[e.target.id].value);
+                if (settingItem) {
+                    const valueSpan = settingItem.querySelector('.value-span');
+                    currentSettings[e.target.id].value = parseFloat(e.target.value);
+                    valueSpan.textContent = currentSettings[e.target.id].format(currentSettings[e.target.id].value);
+                }
             }
         });
 
@@ -462,6 +485,3 @@
     </script>
 </body>
 </html>
-
-
-
