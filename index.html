@@ -119,7 +119,7 @@
 
     <script>
         // --- Configuration and State ---
-        const SETTINGS_CONFIG = {
+        const DEFAULT_SETTINGS = {
             albedo_white: { value: 0.75, min: 0.5, max: 1.0, step: 0.05, format: v => v.toFixed(2), desc: "Reflectivity of white daisies." },
             albedo_black: { value: 0.25, min: 0.0, max: 0.5, step: 0.05, format: v => v.toFixed(2), desc: "Reflectivity of black daisies." },
             albedo_ground: { value: 0.50, min: 0.0, max: 1.0, step: 0.05, format: v => v.toFixed(2), desc: "Reflectivity of bare ground." },
@@ -129,7 +129,16 @@
             heating_effect: { value: 20, min: 0, max: 50, step: 2, format: v => v.toFixed(0), desc: "Local heating from daisies." },
             stability_turns: { value: 250, min: 50, max: 1000, step: 50, format: v => v.toFixed(0), desc: "Turns of no change for stability." },
         };
-        let currentSettings = JSON.parse(JSON.stringify(SETTINGS_CONFIG));
+        
+        function deepCopySettings(source) {
+            const newSettings = {};
+            for (const key in source) {
+                newSettings[key] = { ...source[key] };
+            }
+            return newSettings;
+        }
+
+        let currentSettings = deepCopySettings(DEFAULT_SETTINGS);
         let animationFrameId;
         
         // --- DOM Elements ---
@@ -172,7 +181,7 @@
         class Daisyworld {
             constructor(settings) { this.reset(settings); }
             reset(settings) {
-                this.settings = JSON.parse(JSON.stringify(settings)); // Deep copy
+                this.settings = deepCopySettings(settings); // Deep copy
                 Object.keys(this.settings).forEach(key => this[key] = this.settings[key].value);
                 this.solar_luminosity = this.start_luminosity;
                 this.frac_white = 0.01;
@@ -254,9 +263,11 @@
         function updateUIFromSettings() {
              for (const key in currentSettings) {
                 const slider = document.getElementById(key);
-                const valueSpan = slider.previousElementSibling.querySelector('span');
-                slider.value = currentSettings[key].value;
-                valueSpan.textContent = currentSettings[key].format(currentSettings[key].value);
+                if (slider) {
+                    const valueSpan = slider.previousElementSibling.querySelector('span');
+                    slider.value = currentSettings[key].value;
+                    valueSpan.textContent = currentSettings[key].format(currentSettings[key].value);
+                }
             }
         }
 
@@ -373,7 +384,7 @@
         });
 
         defaultsBtn.addEventListener('click', () => {
-            currentSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+            currentSettings = deepCopySettings(DEFAULT_SETTINGS);
             updateUIFromSettings();
         });
 
@@ -431,7 +442,7 @@
             if (e.target.type === 'range') {
                 const valueSpan = e.target.previousElementSibling.querySelector('span');
                 currentSettings[e.target.id].value = parseFloat(e.target.value);
-                valueSpan.textContent = currentSettings[e.target.id].format(e.target.value);
+                valueSpan.textContent = currentSettings[e.target.id].format(currentSettings[e.target.id].value);
             }
         });
 
@@ -441,3 +452,4 @@
     </script>
 </body>
 </html>
+
