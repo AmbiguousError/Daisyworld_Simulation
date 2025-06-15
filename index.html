@@ -164,7 +164,8 @@
                 datasets: [
                     { label: 'Temp (°C)', data: [], borderColor: 'rgb(255, 99, 132)', tension: 0.1, yAxisID: 'y1' },
                     { label: 'White Daisies (%)', data: [], borderColor: 'rgb(240, 240, 240)', tension: 0.1, yAxisID: 'y' },
-                    { label: 'Black Daisies (%)', data: [], borderColor: 'rgb(160, 160, 160)', tension: 0.1, yAxisID: 'y' }
+                    { label: 'Black Daisies (%)', data: [], borderColor: 'rgb(160, 160, 160)', tension: 0.1, yAxisID: 'y' },
+                    { label: 'Bare Ground (%)', data: [], borderColor: 'rgb(150, 120, 90)', tension: 0.1, yAxisID: 'y' }
                 ]
             },
             options: {
@@ -181,18 +182,18 @@
         class Daisyworld {
             constructor(settings) { this.reset(settings); }
             reset(settings) {
-                this.settings = deepCopySettings(settings); // Deep copy
+                this.settings = deepCopySettings(settings);
                 Object.keys(this.settings).forEach(key => this[key] = this.settings[key].value);
                 this.solar_luminosity = this.start_luminosity;
                 this.frac_white = 0.01;
                 this.frac_black = 0.01;
+                this.frac_ground = 1 - this.frac_white - this.frac_black;
                 this.time = 0;
-                this.history = { temp: [], white: [], black: [] };
+                this.history = { temp: [], white: [], black: [], ground: [] };
                 this.end_reason = null;
             }
             getPlanetaryAlbedo() {
-                const ground_frac = 1 - this.frac_white - this.frac_black;
-                return this.frac_white * this.albedo_white + this.frac_black * this.albedo_black + ground_frac * this.albedo_ground;
+                return this.frac_white * this.albedo_white + this.frac_black * this.albedo_black + this.frac_ground * this.albedo_ground;
             }
             step() {
                 if (this.solar_luminosity < 1.8) this.solar_luminosity += this.luminosity_change;
@@ -209,10 +210,10 @@
                 const beta_white = growthRate(temp_white);
                 const beta_black = growthRate(temp_black);
                 
-                const ground_frac = Math.max(0, 1 - this.frac_white - this.frac_black);
+                this.frac_ground = Math.max(0, 1 - this.frac_white - this.frac_black);
                 
-                const change_white = this.frac_white * (ground_frac * beta_white - this.death_rate);
-                const change_black = this.frac_black * (ground_frac * beta_black - this.death_rate);
+                const change_white = this.frac_white * (this.frac_ground * beta_white - this.death_rate);
+                const change_black = this.frac_black * (this.frac_ground * beta_black - this.death_rate);
                 
                 this.frac_white = Math.max(0.0001, Math.min(1, this.frac_white + change_white * 0.1));
                 this.frac_black = Math.max(0.0001, Math.min(1, this.frac_black + change_black * 0.1));
@@ -221,6 +222,7 @@
                 this.history.temp.push(planetary_temp);
                 this.history.white.push(this.frac_white * 100);
                 this.history.black.push(this.frac_black * 100);
+                this.history.ground.push(this.frac_ground * 100);
 
                 if (this.time > 500 && (this.frac_white + this.frac_black) < 0.01) this.end_reason = 'extinct';
                 if (this.time > this.stability_turns) {
@@ -309,6 +311,7 @@
                 <div class="flex justify-between"><span>Temperature:</span> <span class="text-red-500">${world.history.temp.slice(-1)[0].toFixed(2)}°C</span></div>
                 <div class="flex justify-between"><span>White Daisies:</span> <span class="text-white">${world.history.white.slice(-1)[0].toFixed(2)}%</span></div>
                 <div class="flex justify-between"><span>Black Daisies:</span> <span class="text-gray-400">${world.history.black.slice(-1)[0].toFixed(2)}%</span></div>
+                <div class="flex justify-between"><span>Bare Ground:</span> <span class="text-yellow-700">${world.history.ground.slice(-1)[0].toFixed(2)}%</span></div>
             `;
         }
 
@@ -317,7 +320,8 @@
             dataChart.data.datasets[0].data.push(world.history.temp.slice(-1)[0]);
             dataChart.data.datasets[1].data.push(world.history.white.slice(-1)[0]);
             dataChart.data.datasets[2].data.push(world.history.black.slice(-1)[0]);
-            if (dataChart.data.labels.length > 200) { // Keep chart from getting too crowded
+            dataChart.data.datasets[3].data.push(world.history.ground.slice(-1)[0]);
+            if (dataChart.data.labels.length > 200) {
                 dataChart.data.labels.shift();
                 dataChart.data.datasets.forEach(dataset => dataset.data.shift());
             }
@@ -354,6 +358,7 @@
                 <div class="flex justify-between"><span>Final Temp:</span> <span class="text-red-500">${final_temp.toFixed(2)}°C</span></div>
                 <div class="flex justify-between"><span>Final White Pop:</span> <span class="text-white">${world.frac_white.toFixed(2)*100}%</span></div>
                 <div class="flex justify-between"><span>Final Black Pop:</span> <span class="text-gray-400">${world.frac_black.toFixed(2)*100}%</span></div>
+                <div class="flex justify-between"><span>Final Bare Ground:</span> <span class="text-yellow-700">${world.frac_ground.toFixed(2)*100}%</span></div>
             `;
             endModal.classList.remove('hidden');
         }
@@ -457,5 +462,6 @@
     </script>
 </body>
 </html>
+
 
 
