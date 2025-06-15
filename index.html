@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daisyworld Simulation</title>
+    <title>DaisyWorld Simulation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,14 +33,14 @@
 <body class="bg-gray-900 text-gray-200 antialiased">
 
     <div id="settings-screen" class="container mx-auto p-4 md:p-8">
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 text-center">Daisyworld Simulation</h1>
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 text-center">DaisyWorld Simulation</h1>
         <p class="text-center text-gray-400 mb-8 max-w-3xl mx-auto">An interactive model demonstrating the Gaia Hypothesis, where life self-regulates its environment. Adjust the parameters below and run your own experiments.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             <!-- Left Column: Explanation -->
             <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
                 <h2 class="text-2xl font-bold text-sky-400 mb-4">The Experiment</h2>
-                <p class="text-gray-400 mb-6">Life on Daisyworld consists of two species: black daisies that absorb heat and white daisies that reflect it. Their competition for space creates a feedback loop that can stabilize the planet's temperature, even as its sun changes.</p>
+                <p class="text-gray-400 mb-6">Life on DaisyWorld consists of two species: black daisies that absorb heat and white daisies that reflect it. Their competition for space creates a feedback loop that can stabilize the planet's temperature, even as its sun changes.</p>
                 <h3 class="text-xl font-bold text-sky-400 mb-3">Core Formulas</h3>
                 <div class="font-mono text-sm text-gray-500 space-y-2">
                     <p>Temp ~ (Luminosity * (1 - Albedo)) ^ 0.25</p>
@@ -76,7 +76,7 @@
             </div>
 
             <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                <h2 class="text-2xl font-bold text-white mb-6">Daisyworld State</h2>
+                <h2 class="text-2xl font-bold text-white mb-6">DaisyWorld State</h2>
                 <div id="info-panel" class="space-y-3 font-mono text-lg">
                     <!-- Info will be dynamically inserted here -->
                 </div>
@@ -433,7 +433,7 @@
             aiContent.textContent = "Querying the AI... please wait.";
             aiModal.classList.remove('hidden');
             
-            const prompt = `You are a planetary scientist observing a simulation of Daisyworld. The experiment just ended. 
+            const prompt = `You are a planetary scientist observing a simulation of DaisyWorld. The experiment just ended. 
             The final temperature was ${world.history.temp.slice(-1)[0].toFixed(2)}C, 
             the white daisy population was ${(world.frac_white * 100).toFixed(2)}%, 
             and the black daisy population was ${(world.frac_black * 100).toFixed(2)}%. 
