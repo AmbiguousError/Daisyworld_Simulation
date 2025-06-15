@@ -241,10 +241,10 @@
             for (const key in currentSettings) {
                 const params = currentSettings[key];
                 const sliderHTML = `
-                    <div>
+                    <div class="setting-item">
                         <div class="flex justify-between items-center">
                             <label for="${key}" class="font-medium text-white">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
-                            <span class="font-mono text-sky-400">${params.format(params.value)}</span>
+                            <span class="value-span font-mono text-sky-400">${params.format(params.value)}</span>
                         </div>
                         <p class="text-sm text-gray-400 mb-2">${params.desc}</p>
                         <input type="range" id="${key}" min="${params.min}" max="${params.max}" step="${params.step}" value="${params.value}" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
@@ -256,7 +256,9 @@
         function updateSettingsFromUI() {
             for (const key in currentSettings) {
                 const slider = document.getElementById(key);
-                currentSettings[key].value = parseFloat(slider.value);
+                if (slider) {
+                    currentSettings[key].value = parseFloat(slider.value);
+                }
             }
         }
         
@@ -264,7 +266,8 @@
              for (const key in currentSettings) {
                 const slider = document.getElementById(key);
                 if (slider) {
-                    const valueSpan = slider.previousElementSibling.querySelector('span');
+                    const settingItem = slider.closest('.setting-item');
+                    const valueSpan = settingItem.querySelector('.value-span');
                     slider.value = currentSettings[key].value;
                     valueSpan.textContent = currentSettings[key].format(currentSettings[key].value);
                 }
@@ -412,7 +415,7 @@
             Write a creative, narrative-style field report log entry explaining what you observed and the likely story of this planet's fate.`;
 
             // This is where you would call the Gemini API
-            const apiKey = ""; // API Key for Gemini
+            const apiKey = ""; // IMPORTANT: Add your Gemini API key here
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
@@ -426,11 +429,12 @@
                 if (result.candidates && result.candidates.length > 0) {
                      aiContent.textContent = result.candidates[0].content.parts[0].text;
                 } else {
-                     aiContent.textContent = "The AI returned an empty response. It might be pondering the void of your extinct world.";
+                     aiContent.textContent = "The AI returned an empty or invalid response. This often happens if the API key is missing or invalid. Please check the browser console (F12) for more details.";
+                     console.error("AI Response Error:", result);
                 }
             } catch (error) {
-                aiContent.textContent = "Error connecting to the analysis AI. Please check the network connection and try again.";
-                console.error("Gemini API Error:", error);
+                aiContent.textContent = `An error occurred while connecting to the AI. Please check the browser console (F12) for details. The most common cause is a missing or invalid API key.`;
+                console.error("Gemini API Fetch Error:", error);
             }
         });
         
@@ -440,7 +444,8 @@
 
         settingsContainer.addEventListener('input', e => {
             if (e.target.type === 'range') {
-                const valueSpan = e.target.previousElementSibling.querySelector('span');
+                const settingItem = e.target.closest('.setting-item');
+                const valueSpan = settingItem.querySelector('.value-span');
                 currentSettings[e.target.id].value = parseFloat(e.target.value);
                 valueSpan.textContent = currentSettings[e.target.id].format(currentSettings[e.target.id].value);
             }
@@ -452,4 +457,5 @@
     </script>
 </body>
 </html>
+
 
